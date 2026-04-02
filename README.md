@@ -6,7 +6,11 @@ A portable format for cryptographic agent policy acknowledgement receipts. A rec
 
 ## Specification
 
-**[ORS-v0.1.md](ORS-v0.1.md)** — The full specification. Covers receipt schema, canonicalization (RFC 8785), Ed25519 signing, JWKS key distribution, verification algorithm, HTTP header conventions, and extension namespaces.
+**[ORS-v0.2.md](ORS-v0.2.md)** — Current version. Adds optional policy classification fields (`terms_type`, `terms_service`, `terms_version`), `model_training` action type, normative Merkle anchor and zero-knowledge proof extension definitions, JSON-LD compatibility note, and a v0.1 migration guide.
+
+**[ORS-v0.1.md](ORS-v0.1.md)** — Initial release (February 2026). Covers the core receipt schema, canonicalization (RFC 8785), Ed25519 signing, JWKS key distribution, verification algorithm, and HTTP header conventions.
+
+v0.2 is fully backward compatible with v0.1. Existing receipts and verification tooling continue to work without modification.
 
 ## Verify a receipt
 
@@ -25,7 +29,7 @@ Requires Python 3.10+ and the `cryptography` library (`pip install cryptography`
 
 ## Examples
 
-The `examples/` directory contains 9 annotated receipt files demonstrating different features:
+The `examples/` directory contains annotated receipt files demonstrating different features:
 
 | File | Demonstrates |
 |------|-------------|
@@ -38,12 +42,13 @@ The `examples/` directory contains 9 annotated receipt files demonstrating diffe
 | `large_context.json` | 40 key action_context, near size limits |
 | `request_bound_api_call.json` | Anti replay with provider nonce and request hash |
 | `refusal.json` | Declined decision, negative evidence for compliance |
+| `policy_classification.json` | v0.2 policy classification fields: terms_type, terms_service, terms_version |
 
 Example canonical hashes are computed from the actual payload fields. Signatures are illustrative since no private key is distributed.
 
 ## Reference Implementation
 
-[Openterms MCP server](https://github.com/jstibal/openterms-mcp) — open source (Apache 2.0), implements ORS v0.1 receipt issuance and verification.
+[Openterms MCP server](https://github.com/jstibal/openterms-mcp) — open source (Apache 2.0), implements ORS receipt issuance and verification.
 
 ## Feedback
 
