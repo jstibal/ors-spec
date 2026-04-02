@@ -6,11 +6,47 @@ A portable format for cryptographic agent policy acknowledgement receipts. A rec
 
 ## Specification
 
-**[ORS-v0.2.md](ORS-v0.2.md)** — Current version. Adds optional policy classification fields (`terms_type`, `terms_service`, `terms_version`), `model_training` action type, normative Merkle anchor and zero-knowledge proof extension definitions, JSON-LD compatibility note, and a v0.1 migration guide.
+**[ORS-v0.2.md](ORS-v0.2.md)** — Current version (April 2026).
 
-**[ORS-v0.1.md](ORS-v0.1.md)** — Initial release (February 2026). Covers the core receipt schema, canonicalization (RFC 8785), Ed25519 signing, JWKS key distribution, verification algorithm, and HTTP header conventions.
+**[ORS-v0.1.md](ORS-v0.1.md)** — Initial release (February 2026).
 
-v0.2 is fully backward compatible with v0.1. Existing receipts and verification tooling continue to work without modification.
+v0.2 is fully backward compatible with v0.1. Existing receipts and verification tooling work without modification.
+
+## What v0.2 adds
+
+### Policy classification fields: `terms_type`, `terms_service`, `terms_version`
+
+v0.1 receipts record that an agent acknowledged a policy at a specific URL. That proves the acknowledgment happened, but tells you nothing about what kind of policy it was or which service issued it. If you want to answer "did every model training run produce a Data Processing Agreement receipt?" or "how many API calls acknowledged an OpenAI privacy policy this month?", you previously had no structured way to query that across a receipt ledger.
+
+v0.2 adds three optional signed fields to the payload:
+
+- `terms_type` — the kind of policy acknowledged (e.g. `"Privacy Policy"`, `"Data Processing Agreement"`, `"Terms of Service"`). Recommended values follow [Open Terms Archive](https://opentermsarchive.org/) vocabulary so receipts from different issuers can be compared using the same taxonomy.
+- `terms_service` — a slug identifying the service whose policy was acknowledged (e.g. `"openai"`, `"aws"`, `"github"`). Enables filtering all receipts for a given provider without parsing URLs.
+- `terms_version` — the version of the policy document at acknowledgment time, typically a date string (e.g. `"2024-01-15"`). Answers "was the agent running on the current version of this policy, or a stale one?".
+
+All three are optional and included in the signed canonical payload when present, so they are tamper-evident. They are self-asserted by the issuer; the spec deliberately does not require a registry lookup on issuance. An implementation can validate against a known taxonomy out of band if stricter governance is needed.
+
+### `model_training` action type
+
+v0.1's `action_type` enum covered `api_call`, `data_access`, `purchase`, and `custom`. AI training runs are a materially distinct class of action: they consume datasets at scale, trigger data licensing obligations, and are increasingly subject to regulatory disclosure requirements (EU AI Act, copyright litigation context). Folding them into `data_access` or `custom` meant losing structured signal. `model_training` is now a first-class action type, enabling receipt infrastructure to separately track and audit training-time policy acknowledgments from inference-time ones.
+
+### Normative Merkle anchor specification (`ors.anchor`)
+
+v0.1 defined `ors.anchor` as a placeholder — it listed some field names but gave no verification procedure. An implementor couldn't build a conformant Merkle inclusion verifier from the spec alone.
+
+v0.2 promotes it to normative: required fields are defined (`type`, `root_hash`, `tree_size`), the leaf construction rule is specified (`SHA256("ORS_LEAF_V1" || canonical_hash_bytes)`), and the full inclusion proof verification procedure is written out step by step including the left-right sibling ordering rule derived from `leaf_index`. This is the primitive needed to anchor receipt batches to a transparency log or similar service and produce independently verifiable proof that a receipt existed at a given point in time, without requiring the verifier to trust the issuer's database.
+
+### Normative zero-knowledge proof reference (`ors.zk_proof`)
+
+Similarly, v0.1 sketched `ors.zk_proof` with four field names and no semantics. v0.2 specifies the required fields (`system`, `statement_hash`, `proof_hash`), the verification procedure (fetch proof artifact, verify hash integrity, verify against public inputs), and the critical binding rule: the receipt's `canonical_hash` MUST be a public input to the proof circuit so the proof cannot be detached and replayed against a different receipt. This makes `ors.zk_proof` usable for governance scenarios where an issuer needs to prove a receipt satisfied a constraint (e.g. budget under threshold, role membership satisfied) without revealing the underlying private inputs to an external auditor.
+
+### JSON-LD compatibility note
+
+Clarifies that `@context` must NOT be included in the canonicalized payload. Implementations that need semantic web tooling can add `@context` to the envelope after signing without affecting verification. This removes an ambiguity that would otherwise cause interoperability issues between implementations that add `@context` and those that don't.
+
+### Migration guide (Appendix C)
+
+Concrete instructions for issuers, verifiers, and `ors.anchor`/`ors.zk_proof` users upgrading from v0.1 to v0.2.
 
 ## Verify a receipt
 
