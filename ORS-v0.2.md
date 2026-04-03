@@ -784,6 +784,8 @@ Canonical JSON:
 {"action_type":"api_call","agent_id":"agent-test","amount_charged":0,"created_at":"2026-04-01T12:00:00.050Z","pricing_version":"2025-01","receipt_id":"550e8400-e29b-41d4-a716-446655440012","terms_hash":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","terms_service":"openai","terms_type":"Privacy Policy","terms_url":"https://openai.com/policies/privacy-policy","terms_version":"2024-01-15","timestamp":"2026-04-01T12:00:00.000Z","workspace_id":"550e8400-e29b-41d4-a716-446655440000"}
 ```
 
+SHA 256: `f4e650a6787986385b09b5e5e0507f45a1a0d25a5d1c2513fd74572876b55ade`
+
 ## Appendix C. Migration guide: v0.1 to v0.2
 
 **For receipt issuers:**
