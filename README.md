@@ -6,11 +6,29 @@ A portable format for cryptographic agent policy acknowledgement receipts. A rec
 
 ## Specification
 
-**[ORS-v0.2.md](ORS-v0.2.md)** — Current version (April 2026).
+**[ORS-v0.3.md](ORS-v0.3.md)** — Current version (May 2026).
+
+**[ORS-v0.2.md](ORS-v0.2.md)** — April 2026.
 
 **[ORS-v0.1.md](ORS-v0.1.md)** — Initial release (February 2026).
 
-v0.2 is fully backward compatible with v0.1. Existing receipts and verification tooling work without modification.
+v0.3 is fully backward compatible with v0.2 and v0.1. The core receipt format — required fields, canonicalization, hashing, and signing — is unchanged. Existing receipts and verification tooling continue to work without modification.
+
+## What v0.3 adds
+
+### Normative `ors.mandate` extension namespace
+
+v0.3 documents the `ors.mandate` receipt-binding extension as a normative, optional extension under Section 11.1. The extension lives at `action_context.ors.mandate` and binds a recorded action to an OpenTerms Mandate commitment — a signed grant of authority from a principal to an agent — via four fixed members: `mandate_id`, `mandate_hash` (the lowercase hex SHA-256 of the canonical commitment), `scope_snapshot` (the scope axes the action actually consumed), and `chain_depth` (always `0` in v1). The four-member shape, types, and meaning are fixed by the OpenTerms Mandate Workstream 1 commitment specification, Section 6.1. `chain_material` and `utilization_ref` are not v1 members.
+
+The extension is purely additive. A receipt with no `action_context.ors.mandate` member is a valid v0.3 receipt and is unaffected; existing v0.1 and v0.2 receipts remain valid v0.3 receipts. v0.3 does not change the core receipt format, the canonicalization, or the signing.
+
+**Signing boundary.** The mandate commitment carries its own Ed25519 signature under a distinct domain-separation prefix (`OTMANDATE-v0.1\x00`), separate from the ORS receipt signing prefix (`ORSv0.1\x00`). The ORS receipt signature does not sign or vouch for the mandate; it commits only to the binding values `mandate_id` and `mandate_hash` (which are inside `action_context` and therefore in the canonicalized signed payload). A verifier that wishes to confirm the mandate binding follows the procedure in the W1 commitment specification, Section 7 — referenced from ORS-v0.3.md §11.1 rather than restated there.
+
+A worked vector is included as [`examples/mandate_bound_receipt.json`](examples/mandate_bound_receipt.json), carrying the W1 §6.2 values verbatim.
+
+### Migration guide (Appendix D)
+
+Concrete instructions for issuers, verifiers, and existing `ors.mandate` users upgrading from v0.2 to v0.3. No change is required of existing receipts or verifiers.
 
 ## What v0.2 adds
 
@@ -79,6 +97,7 @@ The `examples/` directory contains annotated receipt files demonstrating differe
 | `request_bound_api_call.json` | Anti replay with provider nonce and request hash |
 | `refusal.json` | Declined decision, negative evidence for compliance |
 | `policy_classification.json` | v0.2 policy classification fields: terms_type, terms_service, terms_version |
+| `mandate_bound_receipt.json` | v0.3 ors.mandate extension binding a receipt to an OpenTerms Mandate commitment |
 
 Example canonical hashes are computed from the actual payload fields. Signatures are illustrative since no private key is distributed.
 
