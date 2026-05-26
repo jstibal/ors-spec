@@ -545,13 +545,17 @@ When `scope_snapshot` is present, its members MUST be typed as follows: `action`
 
 **Signing boundary.** The `ors.mandate` extension is a hash-anchored reference to a separately-signed artifact. The mandate commitment carries its own Ed25519 signature, produced under its own domain-separation prefix `OTMANDATE-v0.1\x00`, which is deliberately distinct from the ORS receipt signing prefix (`ORSv0.1\x00`, Section 6). The ORS receipt signature does not sign, validate, or vouch for the mandate. What the receipt signature does cover is the binding itself: because `ors.mandate` lives inside `action_context`, the values `mandate_id` and `mandate_hash` are part of the canonicalized signed payload (Section 4), and so the receipt issuer's signature commits to which mandate this receipt is bound to. The receipt's signature is not a substitute for verifying the mandate.
 
-**Verification procedure for `ors.mandate`.** Verifying the receipt itself follows Section 8 unchanged; this extension does not alter that procedure. A verifier that additionally wishes to confirm the mandate binding SHOULD:
+**Verification procedure for `ors.mandate`.** Verifying the receipt itself follows Section 8 unchanged; this extension does not alter that procedure. Beyond that baseline, the normative force of the binding-verification steps depends on what the verifier intends to claim.
 
-1. Verify the ORS receipt under Section 8. The receipt must verify before the binding is meaningful.
-2. Retrieve the mandate commitment named by `mandate_id` from local cache, from the agent, or from a registration API. The procedure is offline once the commitment is held.
-3. Canonicalize the commitment per the W1 commitment specification, Section 4, compute SHA-256, and confirm the lowercase hex digest equals `mandate_hash`. On any mismatch the binding is broken.
-4. Verify the mandate commitment's own signature under its `OTMANDATE-v0.1\x00` domain prefix, per the W1 commitment specification, Section 5.
+A verifier that claims the *mandate-bound-and-verified* posture defined in Section 8 MUST perform every one of the following checks; a verifier that performs fewer of them MUST NOT report `mandate-bound-and-verified` and MUST instead report only `receipt-valid` (or an implementation-specific unverified status) for the binding:
+
+1. Verify the ORS receipt under Section 8. The receipt MUST verify before the binding is meaningful.
+2. Retrieve the mandate commitment named by `mandate_id` — from local cache, from the agent, or from a registration API. The procedure is offline once the commitment is held.
+3. Canonicalize the commitment per the W1 commitment specification, Section 4, compute SHA-256, and confirm the lowercase hex digest equals `mandate_hash`. On any mismatch the binding is broken and the verifier MUST report a verification failure.
+4. Verify the mandate commitment's own Ed25519 signature under its `OTMANDATE-v0.1\x00` domain prefix, per the W1 commitment specification, Section 5.
 5. Confirm the mandate's validity window covers the receipt's `timestamp`, the mandate's `agent.agent_id` equals the receipt's `agent_id`, and the `scope_snapshot` falls within the mandate's `scope`.
+
+A verifier that does not claim the `mandate-bound-and-verified` posture — for example, a tool performing optional, informational inspection of the binding without making an authorization decision — SHOULD perform the same steps where it can, and MUST NOT report `mandate-bound-and-verified` if it skips any of them. Partial inspection is permitted only on the `receipt-valid` (or implementation-specific unverified-binding) path. The threshold for the verified posture is all-or-nothing: a verifier that performs four of the five steps and reports `mandate-bound-and-verified` would let the skipped check pass vacuously, which is the failure mode this rule closes.
 
 The authoritative definition of this procedure is the W1 commitment specification, Section 7; it is referenced here rather than restated. ORS verifiers that do not consume `ors.mandate` are unaffected.
 
