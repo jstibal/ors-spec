@@ -567,7 +567,7 @@ An implementation that supports only the `receipt-valid` posture is fully confor
 
 The authoritative definition of this procedure is the W1 commitment specification, Section 7; it is referenced here rather than restated. ORS verifiers that do not consume `ors.mandate` are unaffected.
 
-A worked example of a mandate-bound receipt is provided as `examples/mandate_bound_receipt.json` in this repository. It carries the `ors.mandate` extension at `action_context.ors.mandate` with the W1 Section 6.2 values verbatim, surrounded by an otherwise ordinary v0.3 receipt envelope.
+A worked example of a mandate-bound receipt is provided as `examples/mandate_bound_receipt.illustrative.json` in this repository. It carries the `ors.mandate` extension at `action_context.ors.mandate` with the W1 Section 6.2 values verbatim, surrounded by an otherwise ordinary v0.3 receipt envelope. The `.illustrative` suffix signals that the file's `signature` is an illustrative placeholder rather than a real Ed25519 signature (its `canonical_hash` is real and reproducible from the payload per Section 4); real cryptographic conformance vectors are maintained in the OpenTerms Mandate SDK conformance suite, not in this repository's `examples/` directory.
 
 **Verification posture.** A relying party that requires a mandate MUST NOT accept a receipt with no `action_context.ors.mandate` extension as a substitute for one whose binding has been verified. The two postures a relying party can demand — *receipt-valid* and *mandate-bound-and-verified* — and the requirement that mandate-required relying parties reject unbound receipts are defined normatively in Section 8 under "Verification postures."
 

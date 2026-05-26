@@ -24,7 +24,7 @@ The extension is purely additive. A receipt with no `action_context.ors.mandate`
 
 **Signing boundary.** The mandate commitment carries its own Ed25519 signature under a distinct domain-separation prefix (`OTMANDATE-v0.1\x00`), separate from the ORS receipt signing prefix (`ORSv0.1\x00`). The ORS receipt signature does not sign or vouch for the mandate; it commits only to the binding values `mandate_id` and `mandate_hash` (which are inside `action_context` and therefore in the canonicalized signed payload). A verifier that wishes to confirm the mandate binding follows the procedure in the W1 commitment specification, Section 7 — referenced from ORS-v0.3.md §11.1 rather than restated there.
 
-A worked vector is included as [`examples/mandate_bound_receipt.json`](examples/mandate_bound_receipt.json), carrying the W1 §6.2 values verbatim.
+A worked vector is included as [`examples/mandate_bound_receipt.illustrative.json`](examples/mandate_bound_receipt.illustrative.json), carrying the W1 §6.2 values verbatim. The `.illustrative` suffix marks the file as carrying a placeholder signature; real cryptographic conformance vectors live in the OpenTerms Mandate SDK conformance suite.
 
 ### Migration guide (Appendix D)
 
@@ -97,7 +97,7 @@ The `examples/` directory contains annotated receipt files demonstrating differe
 | `request_bound_api_call.json` | Anti replay with provider nonce and request hash |
 | `refusal.json` | Declined decision, negative evidence for compliance |
 | `policy_classification.json` | v0.2 policy classification fields: terms_type, terms_service, terms_version |
-| `mandate_bound_receipt.json` | v0.3 ors.mandate extension binding a receipt to an OpenTerms Mandate commitment |
+| `mandate_bound_receipt.illustrative.json` | v0.3 ors.mandate extension binding a receipt to an OpenTerms Mandate commitment (illustrative signature; real conformance vectors live in the SDK) |
 
 Example canonical hashes are computed from the actual payload fields. Signatures are illustrative since no private key is distributed.
 
