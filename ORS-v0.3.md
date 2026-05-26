@@ -587,6 +587,8 @@ The canonicalization algorithm in Section 4 constructs the signed payload from a
 
 The treatment of `@context` defined in Section 11.2 — added to the envelope after signing, not canonicalized, ignored by verifiers — is consistent with the rules above; Section 11.2 is the named precedent for this pattern.
 
+## 12. Security considerations
+
 * Signing keys MUST remain secret. Only public keys are distributed via JWKS.
 * Receipts are not encrypted. All fields are plaintext. Do not include secrets, tokens, or PII.
 * `terms_hash` binds the receipt to an immutable policy document snapshot. Verifiers can confirm the terms document has not changed since the receipt was issued by re-hashing the document at `terms_url`.
