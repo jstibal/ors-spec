@@ -577,7 +577,15 @@ ORS receipts are plain JSON and do not include a `@context` field in the signed 
 
 A compatible JSON-LD context for ORS receipts MAY be published at `https://openterms.io/ns/ors/v0.3/context.jsonld`. This is informational and not required for conformance.
 
-## 12. Security considerations
+### 11.3 Unknown top-level fields
+
+The canonicalization algorithm in Section 4 constructs the signed payload from a closed set of fields — the Section 3a payload fields and the Section 3b signed envelope fields — and the Section 8 VERIFY algorithm extracts that same closed set. Top-level fields outside this set are by construction not part of the canonical payload and are not covered by the receipt signature. This subsection states how a verifier MUST treat them.
+
+**Underscore-prefixed top-level fields.** A top-level field whose name begins with an underscore character (`_`) is documentation-only. It MUST NOT be included in the canonical payload, MUST NOT be covered by the receipt signature, and MUST be ignored by verifiers when recomputing the canonical hash and when making any verification decision. Production receipts MUST NOT rely on underscore-prefixed fields for any verification, authorization, scope, identity, or policy-classification semantics; such fields are for human-readable annotation only. This legitimizes the existing convention — used by the worked vectors in `examples/` — of carrying a leading `_comment` and `_note` on illustrative receipts.
+
+**Other unknown top-level fields.** A top-level field that is not listed in Section 3a, Section 3b, Section 3c, or Section 11.2, and that is not underscore-prefixed, MUST be ignored by verifiers when recomputing the canonical hash — the canonical payload contains only the fields enumerated in Section 4 step 1 and Section 8 step 1, so such a field is by construction outside the signed payload. A verifier MUST NOT use an unknown top-level field for any verification or authorization decision. Implementations MAY treat the presence of an unknown top-level field as an error and reject the receipt, or MAY accept the receipt and ignore the field; both are conformant. Implementations that choose to reject SHOULD do so consistently rather than per-call, so issuers and agents can predict whether a given verifier accepts the receipt.
+
+The treatment of `@context` defined in Section 11.2 — added to the envelope after signing, not canonicalized, ignored by verifiers — is consistent with the rules above; Section 11.2 is the named precedent for this pattern.
 
 * Signing keys MUST remain secret. Only public keys are distributed via JWKS.
 * Receipts are not encrypted. All fields are plaintext. Do not include secrets, tokens, or PII.
