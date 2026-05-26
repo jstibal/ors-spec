@@ -332,6 +332,18 @@ VERIFY(receipt, jwks_source):
   7. RETURN {valid: true}
 ```
 
+### Verification postures
+
+The Section 8 VERIFY algorithm establishes that a receipt is a cryptographically valid ORS receipt. It does not, on its own, establish that the action the receipt records was authorized by a mandate. A relying party that requires delegated authority — for example, an API route, a registry entry, or any policy whose enforcement depends on a mandate — needs a stricter check than "the receipt verifies." v0.3 names the two verification outcomes a relying party can demand. Implementations MUST distinguish them.
+
+**Receipt-valid.** The receipt verifies under the Section 8 VERIFY algorithm. An absent `action_context.ors.mandate` extension is NOT a failure under this posture; an unbound receipt is a valid ORS receipt. If the receipt does carry the extension, the binding has not necessarily been verified under this posture — `mandate_id` and `mandate_hash` are committed to by the receipt signature, but the mandate commitment itself has not been retrieved, hashed, or signature-checked. This is the backward-compatible posture and matches the semantics of an ORS v0.1 or v0.2 verifier.
+
+**Mandate-bound-and-verified.** The receipt verifies under the Section 8 VERIFY algorithm AND carries an `action_context.ors.mandate` extension whose binding has been verified — the mandate commitment has been retrieved, its canonical SHA-256 confirmed equal to `mandate_hash`, its own Ed25519 signature verified under its `OTMANDATE-v0.1\x00` domain prefix, and its validity window, agent join, and scope containment checked against the receipt. The authoritative procedure is the OpenTerms Mandate Workstream 1 commitment specification, Section 7; v0.3 references it rather than restating it.
+
+**Mandate-required relying parties.** When a policy, a registry entry, an API route, or any relying party requires a mandate — for example, a registry whose `mandate_policy.required` is true — a receipt with no `action_context.ors.mandate` extension MUST be treated as a verification failure even if the receipt is otherwise a valid ORS receipt. It is not sufficient that the Section 8 VERIFY algorithm returned `{valid: true}`; the relying party MUST require the mandate-bound-and-verified posture and MUST NOT substitute a receipt-valid result for it. Likewise, a receipt that carries the extension but whose binding has not been verified per the mandate specification's Section 7 procedure MUST NOT be accepted under the mandate-required posture.
+
+These postures describe relying-party outcomes; they do not change the Section 8 VERIFY algorithm itself, the canonicalization, or the signing.
+
 ### Decision semantics
 
 A receipt can be cryptographically valid regardless of `decision`. Providers SHOULD treat `decision == "declined"` as proof of refusal, not as permission to serve the action. Refusal receipts exist so that auditors can prove a disallowed action was declined under a specific policy, providing negative evidence for compliance purposes.
@@ -538,6 +550,8 @@ A verifier MUST NOT treat the presence of `action_context.ors.mandate`, or the O
 The authoritative definition of this procedure is the W1 commitment specification, Section 7; it is referenced here rather than restated. ORS verifiers that do not consume `ors.mandate` are unaffected.
 
 A worked example of a mandate-bound receipt is provided as `examples/mandate_bound_receipt.json` in this repository. It carries the `ors.mandate` extension at `action_context.ors.mandate` with the W1 Section 6.2 values verbatim, surrounded by an otherwise ordinary v0.3 receipt envelope.
+
+**Verification posture.** A relying party that requires a mandate MUST NOT accept a receipt with no `action_context.ors.mandate` extension as a substitute for one whose binding has been verified. The two postures a relying party can demand — *receipt-valid* and *mandate-bound-and-verified* — and the requirement that mandate-required relying parties reject unbound receipts are defined normatively in Section 8 under "Verification postures."
 
 ### 11.2 JSON-LD compatibility
 
