@@ -535,6 +535,8 @@ Implementations that include `ors.zk_proof` SHOULD ensure the proof's public inp
 
 The authoritative definition of this procedure is the W1 commitment specification, Section 7; it is referenced here rather than restated. ORS verifiers that do not consume `ors.mandate` are unaffected.
 
+A worked example of a mandate-bound receipt is provided as `examples/mandate_bound_receipt.json` in this repository. It carries the `ors.mandate` extension at `action_context.ors.mandate` with the W1 Section 6.2 values verbatim, surrounded by an otherwise ordinary v0.3 receipt envelope.
+
 ### 11.2 JSON-LD compatibility
 
 ORS receipts are plain JSON and do not include a `@context` field in the signed payload. Implementations that need JSON-LD compatibility for semantic web tooling MAY add a `@context` field to the receipt envelope after the signature has been computed, provided they do not include it in the canonicalized payload. Verifiers MUST ignore `@context` when recomputing the canonical hash.

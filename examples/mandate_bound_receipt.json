@@ -1,0 +1,32 @@
+{
+  "_comment": "Receipt carrying the ors.mandate extension at action_context.ors.mandate, binding the recorded purchase action to an OpenTerms Mandate commitment. The extension content is the worked example from the OpenTerms Mandate Workstream 1 commitment specification, Section 6.2, used verbatim: mandate_id, mandate_hash, scope_snapshot, and chain_depth=0. The mandate is a separately-signed artifact under its own domain-separation prefix (OTMANDATE-v0.1\\x00); the ORS receipt signature does not sign the mandate. See ORS-v0.3.md Section 11.1 for the extension definition and signing boundary.",
+  "_note": "The signature is illustrative. Use verify.py with a live issuer JWKS to verify real receipts. The canonical_hash is the SHA-256 of the canonical payload per Section 4 and is reproducible from the payload fields shown here.",
+  "receipt_id": "550e8400-e29b-41d4-a716-446655440015",
+  "workspace_id": "550e8400-e29b-41d4-a716-446655440000",
+  "agent_id": "agent-purchaser",
+  "action_type": "purchase",
+  "terms_url": "https://supplier-a.com/terms",
+  "terms_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+  "timestamp": "2026-05-15T12:00:00.000Z",
+  "pricing_version": "2025-01",
+  "ors_version": "0.3",
+  "action_context": {
+    "ors": {
+      "mandate": {
+        "mandate_id": "0190f8a0-1c2d-7e3f-8a4b-5c6d7e8f9a0b",
+        "mandate_hash": "bd35514c5b99857e95abfee2dff847b314d6f71ab2ed65ffb493413ccf74444c",
+        "scope_snapshot": {
+          "action": "purchase",
+          "domain": "supplier-a.com",
+          "spend": { "currency": "USD", "amount": 120000 }
+        },
+        "chain_depth": 0
+      }
+    }
+  },
+  "canonical_hash": "d3628eb4a357a1b6acf7e994302e1d7fa64439bbb192a49fa06e91501897433c",
+  "signature": "c2lnbmF0dXJlX2V4YW1wbGVfbWFuZGF0ZQ",
+  "key_id": "key_demo_03",
+  "amount_charged": 120000,
+  "created_at": "2026-05-15T12:00:00.080Z"
+}
